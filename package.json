@@ -1,0 +1,28 @@
+{
+  "name": "servicedesk-pro",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@9.12.3",
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "db:generate": "pnpm --filter @servicedesk/api prisma generate",
+    "db:migrate": "pnpm --filter @servicedesk/api prisma migrate dev",
+    "db:deploy": "pnpm --filter @servicedesk/api prisma migrate deploy",
+    "db:seed": "pnpm --filter @servicedesk/api prisma db seed",
+    "db:reset": "pnpm --filter @servicedesk/api prisma migrate reset --force",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
+  },
+  "devDependencies": {
+    "turbo": "^2.1.3"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}

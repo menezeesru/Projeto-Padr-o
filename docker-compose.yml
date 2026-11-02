@@ -1,0 +1,64 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: servicedesk-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: servicedesk
+      POSTGRES_PASSWORD: servicedesk
+      POSTGRES_DB: servicedesk
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U servicedesk -d servicedesk"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: servicedesk-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://servicedesk:servicedesk@db:5432/servicedesk?schema=public
+      NODE_ENV: production
+      CORS_ORIGIN: http://localhost:5173
+      WEB_URL: http://localhost:5173
+    ports:
+      - "4000:4000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./apps/api/uploads:/app/apps/api/uploads
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: servicedesk-web
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: http://localhost:4000
+    ports:
+      - "5173:80"
+    depends_on:
+      - api
+
+  adminer:
+    image: adminer:latest
+    container_name: servicedesk-adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+volumes:
+  pg_data:
